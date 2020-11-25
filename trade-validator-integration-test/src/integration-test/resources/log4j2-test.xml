@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="it-tests" shutdownHook="disable">
+
+    <Properties>
+        <Property name="PATTERN">%d{HH:mm:ss.SSS} %-5level MDC[%X{mdc-id}] [%thread] %logger{36} - %msg%n</Property>
+        <Property name="CONSOLE_LOG_PATTERN">%highlight{${PATTERN}}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${log4j:CONSOLE_LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.ffb" level="trace"/>
+        <Logger name="org.retrofit2" level="info"/>
+        <Logger name="org.springframework.web" level="warn"/>
+
+        <Root level="warn">
+            <Appender-ref ref="CONSOLE"/>
+        </Root>
+    </Loggers>
+</Configuration>
