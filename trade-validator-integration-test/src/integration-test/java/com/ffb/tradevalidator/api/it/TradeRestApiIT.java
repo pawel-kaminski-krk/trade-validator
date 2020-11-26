@@ -44,17 +44,46 @@ class TradeRestApiIT
     @Value("${server.port:}")
     private int applicationPort;
 
-    private final String INPUT_JSON = readInputFrom("/input.json");
-
     @Test
     void shouldValidateInputTrades() throws IOException
     {
         V1TradeClient apiClient = createApiClient(V1TradeClient.class);
-        Response<Void> execute = apiClient
-                .createTrades(INPUT_JSON)
+
+        //when
+        Response<Void> actual = apiClient
+                .createTrades(readInputFrom("/good-input.json"))
                 .execute();
 
-        assertThat(execute.isSuccessful()).isTrue();
+        assertThat(actual.isSuccessful()).isTrue();
+        assertThat(actual.code()).isEqualTo(202);
+    }
+
+    @Test
+    void shouldReturn400ForEmptyArray() throws IOException
+    {
+        V1TradeClient apiClient = createApiClient(V1TradeClient.class);
+
+        // when
+        Response<Void> actual = apiClient
+                .createTrades("[]")
+                .execute();
+
+        assertThat(actual.code()).isEqualTo(400);
+        assertThat(actual.errorBody().string()).contains("tradeRequest.trades must not be empty");
+    }
+
+    @Test
+    void shouldReturn400ForInvalidTrades() throws IOException
+    {
+        V1TradeClient apiClient = createApiClient(V1TradeClient.class);
+        String badInput = readInputFrom("/bad-input.json");
+        // when
+        Response<Void> actual = apiClient
+                .createTrades(badInput)
+                .execute();
+
+        assertThat(actual.code()).isEqualTo(400);
+        assertThat(actual.errorBody().string()).contains("there are validation errors. See \\nTradeRequest{trades=[Trade{customer=YODA1, type=Spot, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-15, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=Spot, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-21, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=PLUT02, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=PLUTO3, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=null, expiryDate=2020-08-19, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA2, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=null, expiryDate=2020-08-21, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=null, expiryDate=2020-08-25, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=2020-08-12, expiryDate=2020-08-19, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA2, type=VanillaOption, tradeOptionStyle=null, tradeDate=null, valueDate=null, excerciseStartDate=2020-08-12, expiryDate=2020-08-21, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=2020-08-12, expiryDate=2020-08-25, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=2020-08-10, expiryDate=2020-08-19, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}, Trade{customer=PLUTO3, type=VanillaOption, tradeOptionStyle=null, tradeDate=null, valueDate=null, excerciseStartDate=2020-08-10, expiryDate=2020-08-19, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}]}\\n- valueDate [2020-08-15] is required to fall on working day see Trade{customer=YODA1, type=Spot, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-15, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate [2020-08-22] is required to fall on working day see Trade{customer=YODA1, type=Spot, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate [2020-08-22] is required to fall on working day see Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate cannot be before tradeDate but it is - 2020-08-08 < 2020-08-11 see Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate [2020-08-08] is required to fall on working day see Trade{customer=YODA2, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- customer PLUT02 is unsupported see Trade{customer=PLUT02, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate cannot be before tradeDate but it is - 2020-08-08 < 2020-08-11 see Trade{customer=PLUT02, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate [2020-08-08] is required to fall on working day see Trade{customer=PLUT02, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-08, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- customer PLUTO3 is unsupported see Trade{customer=PLUTO3, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- valueDate [2020-08-22] is required to fall on working day see Trade{customer=PLUTO3, type=Forward, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=2020-08-22, excerciseStartDate=null, expiryDate=null, premiumDate=null, deliveryDate=null, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- expiryDate must be before deliveryDate but is not - 2020-08-25 >= 2020-08-22 see Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=null, expiryDate=2020-08-25, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- expiryDate must be before deliveryDate but is not - 2020-08-25 >= 2020-08-22 see Trade{customer=YODA1, type=VanillaOption, tradeOptionStyle=null, tradeDate=2020-08-11, valueDate=null, excerciseStartDate=2020-08-12, expiryDate=2020-08-25, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}\\n- customer PLUTO3 is unsupported see Trade{customer=PLUTO3, type=VanillaOption, tradeOptionStyle=null, tradeDate=null, valueDate=null, excerciseStartDate=2020-08-10, expiryDate=2020-08-19, premiumDate=2020-08-12, deliveryDate=2020-08-22, currencyPair=CurrencyPair{leftCurrency=EUR, rightCurrency=USD}}");
     }
 
     private String readInputFrom(String inputPath)

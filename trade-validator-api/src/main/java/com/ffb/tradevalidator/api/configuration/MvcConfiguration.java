@@ -12,9 +12,16 @@ import com.ffb.tradevalidator.api.model.CurrencyPair;
 import com.ffb.tradevalidator.api.model.TradeRequest;
 import com.ffb.tradevalidator.api.rest.serializer.CurrencyPairDeserializer;
 import com.ffb.tradevalidator.api.rest.serializer.TradeRequestDeserializer;
-import com.ffb.tradevalidator.api.service.Validator;
+import com.ffb.tradevalidator.api.validator.TradesValidator;
+import com.ffb.tradevalidator.api.validator.Validator;
+import com.ffb.tradevalidator.api.validator.trade.CustomerValidator;
+import com.ffb.tradevalidator.api.validator.trade.OptionDateValidator;
+import com.ffb.tradevalidator.api.validator.trade.SpotForwardDateValidator;
+import com.ffb.tradevalidator.api.validator.trade.SpotForwardWorkingDayValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
 
 @Configuration
 public class MvcConfiguration
@@ -35,8 +42,7 @@ public class MvcConfiguration
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
                 .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                ;
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule deserializers = new SimpleModule();
         deserializers.addDeserializer(CurrencyPair.class, new CurrencyPairDeserializer());
         deserializers.addDeserializer(TradeRequest.class, new TradeRequestDeserializer(objectMapper));
@@ -46,7 +52,14 @@ public class MvcConfiguration
     }
 
     @Bean
-    Validator modelValidator() {
-        return new Validator();
+    Validator modelValidator()
+    {
+        return new Validator(
+                new TradesValidator(
+                    new CustomerValidator(Set.of("YODA1", "YODA2")),
+                    new OptionDateValidator(),
+                    new SpotForwardDateValidator(),
+                    new SpotForwardWorkingDayValidator()
+                ));
     }
 }
